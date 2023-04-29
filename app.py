@@ -3,11 +3,12 @@ import streamlit as st
 from streamlit_js_eval import streamlit_js_eval
 from kodeordtjekker import kodeord
 import pycountry
-import pycountry_convert
 import requests
 import socket
-import threading
-
+from dotenv import load_dotenv
+import os
+import openai
+import nmap
 
 tab1, tab2, tab3, tab4 = st.tabs(["IP data", "Port scanner", "Kodeord", "Om"])
 
@@ -18,31 +19,56 @@ public_ip_address = response.text
 # Get the user's country based on their IP address
 response = requests.get(f'https://ipapi.co/{public_ip_address}/country/')
 country_code = response.text
-data = {}
+
+# Setup nmap
+nmap = nmap.PortScanner()
+
+# OpenAI api key
+load_dotenv()
+openai.api_key = os.getenv("openai_key")
 
 
 # Get the country name based on the country code
 country_name = pycountry.countries.get(alpha_2=country_code).name
 
-def scan_port(port):
-   # Create a TCP socket object
-   sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-   sock.settimeout(0.01)
+def scan_open_ports(ip: str):
+    nmap.scan(ip, arguments='-T5 --script=banner')
 
-   result = sock.connect_ex(('77.233.241.187', 21))
-   if result == 0:
-      # If the connection was successful, grab the banner
-      sock.send(b"GET / HTTP/1.1\r\n\r\n")
-      try:
-         banner = sock.recv(1024)
-         banner = banner.decode()
-         data[port] = banner
-      except:
-         print("error")
-      # Append the banner to data dictionary with port number as key
+    data = {}
 
-   # Close the socket
-   sock.close()
+    for proto in nmap[ip].all_protocols():
+        lport = nmap[ip][proto].keys()
+        for port in lport:
+            if nmap[ip][proto][port]['state'] == 'open':
+                service = nmap[ip][proto][port]['name']
+                banner = nmap[ip][proto][port].get('script', {}).get('banner', 'No banner')
+                data[port] = {'service': service, 'banner': banner}
+
+    print(f"Open ports and banners on {ip}: {data}")
+
+    return data
+
+def generate_description(ip, network_datas):
+    descriptions = []
+    for port, data in network_datas.items():
+        service = data['service']
+        banner = data['banner']
+        #text_input = f"Beskriv kort følgende netværksoplysninger for en person uden viden om netværk og IT-sikkerhed, og fokusér på, hvad personen kan gøre bedre med netværket:\n\nIP: {ip}\nPort: {port}\nService: {service}\nBanner: {banner}\n"
+        
+        text_input = f"Provide a brief description in Danish for a person with no knowledge of networking and IT-security about the open ports found in their network, and what they can do better to secure it. Only return a single bullet point. Open ports data:\n Port: {port}\n Service: {service}\n Banner: {banner}\n"
+
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt = text_input,
+            n=1,
+            max_tokens=100
+        )  
+
+        print(response)
+
+        descriptions.append(response.choices[0].text.strip())
+
+    return descriptions
 
 
 # Display the user's public IP, country flag, and user agent under tab1
@@ -55,23 +81,31 @@ with tab1:
 
 with tab2:
    st.header("Port scanner")
-   scan_ip = st.text_input("Angiv en ip adresse du vil scanne for åbne porte")
-
-   open_ports = []
-
+   scan_ip = st.text_input("Angiv en ip adresse du vil scanne for åbne porte", value=public_ip_address)
 
    if st.button("Kør"):
+      print("Kør knappen aktiveret")
       # Set the target IP address and port range
-      target_ip = scan_ip
-      port_range = range(1, 100)
 
-      # Scan each port in the range
-      for port in port_range:
-         scan_port(port)
+      scan_output = scan_open_ports(scan_ip)
 
+      if scan_output:
+         st.write("Open ports, services, and banners on", scan_ip)
+         #st.write(scan_output)
+         st.table(scan_output)
 
-      # Display the results
-      print(f"Found the following information: {data}")
+         descriptions = generate_description(scan_ip, scan_output)
+         st.write("Beskrivelse af dit netværk:")
+
+         bullet_points = []
+         for desc in descriptions:
+            bullet_points.append(f"- {desc}")
+
+         st.markdown("\n".join(bullet_points))
+         
+      else:
+         st.warning("No open ports found.")
+
 
 
    
