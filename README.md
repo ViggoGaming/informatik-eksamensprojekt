@@ -15,3 +15,7 @@ Kør docker-containeren
 docker run -p 8501:8501 informatik-eksamensprojekt
 ```
 
+Herefter kan vores produkt tilgås via følgende web-adresse:
+```
+http://localhost:8501
+```
