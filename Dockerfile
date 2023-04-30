@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     nmap \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://github.com/ViggoGaming/informatik-eksamensprojekt .
+COPY . .
 
 RUN pip3 install -r requirements.txt
 
