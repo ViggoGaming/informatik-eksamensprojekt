@@ -7,7 +7,9 @@ cd informatik-eksamensprojekt
 ```
 
 ## ANGIV OPENAI-API NØGLEN MED KOMMANDOEN FRA RAPPORTEN UNDER AFSNITTET BRUGERVEJLEDNING
-
+```bash
+echo openai_key="INDSÆT OPENAI API KEY HER" >> .env
+```
 
 Byg docker-image
 ```bash
