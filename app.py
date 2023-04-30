@@ -81,16 +81,18 @@ def scan_open_ports(ip: str):
     nmap.scan(ip, arguments='-T5 --script=banner')
 
     data = {}
+    try:
+        for proto in nmap[ip].all_protocols():
+            lport = nmap[ip][proto].keys()
+            for port in lport:
+                if nmap[ip][proto][port]['state'] == 'open':
+                    service = nmap[ip][proto][port]['name']
+                    banner = nmap[ip][proto][port].get('script', {}).get('banner', 'No banner')
+                    data[port] = {'service': service, 'banner': banner}
 
-    for proto in nmap[ip].all_protocols():
-        lport = nmap[ip][proto].keys()
-        for port in lport:
-            if nmap[ip][proto][port]['state'] == 'open':
-                service = nmap[ip][proto][port]['name']
-                banner = nmap[ip][proto][port].get('script', {}).get('banner', 'No banner')
-                data[port] = {'service': service, 'banner': banner}
-
-    return data
+        return data
+    except:
+        pass
 
 def generate_description(network_datas):
     descriptions = []
@@ -153,7 +155,7 @@ with tab2:
 loaded_data = load_data_from_database(public_ip_address)
 
 if loaded_data:
-    with st.expander("Gammel data"):
+    with st.expander("Tidligere scanninger"):
       ip, user_agent, country, open_ports, descriptions, banners = loaded_data
       st.write(f"Offentlig IP-adresse: {ip}")
       st.write(f"User agent: {user_agent}")
