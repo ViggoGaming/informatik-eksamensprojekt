@@ -184,6 +184,13 @@ with tab4:
 
    st.text("""
    
-   Dette er vores informatik eksamensprojekt.
+   Dette er vores Informatik B eksamensprojekt.
+   Udviklet af Rasmus 3.M & Victor 3.M
+   
+   Produktets formål er at hjælpe almindelige brugere til at finde ud af, om der er eksisterer åbne porte på deres lokale netværk, som kan udgøre en sikkerhedstrussel. 
+Skulle dette være tilfældet, laves en række simple AI-genererede beskrivelser af de åbne portes formål og der gives anbefalinger til, hvad man kan gøre for at sikre sig. 
+Produktet er et simpelt værktøj, som kan give et fingerpeg om netværkets sikkerhed. Man kan da finde ud af, om man bør tage handling og evt. kontakte nogle IT-professionelle, som kan hjælpe en. 
+
+   
    
    """)
