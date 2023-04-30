@@ -10,9 +10,9 @@ Byg docker-filen
 docker build -t informatik-eksamensprojekt .
 ```
 
-Kør docker-containeren
+Kør docker-containeren (Husk at angiv den rigtige API-nøgle)
 ```bash
-docker run -p 8501:8501 informatik-eksamensprojekt
+docker run -p 8501:8501 -e apiKey="Enzoic-key" -e openai_key="OpenAI-key" informatik-eksamensprojekt
 ```
 
 Herefter kan vores produkt tilgås via følgende web-adresse:
