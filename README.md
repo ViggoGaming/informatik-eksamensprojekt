@@ -10,7 +10,7 @@ Byg docker-filen
 docker build -t informatik-eksamensprojekt .
 ```
 
-Kør docker-containeren (Husk at angiv den rigtige API-nøgle)
+Kør docker-containeren (Husk at angiv den rigtige OpenAI API-nøgle i filen ".env")
 ```bash
 docker run -p 8501:8501 informatik-eksamensprojekt
 ```
