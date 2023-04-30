@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     software-properties-common \
     git \
+    nmap \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/ViggoGaming/informatik-eksamensprojekt .
